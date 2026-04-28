@@ -31,4 +31,15 @@ public class DestinationCandidateController {
     public List<DestinationCandidate> getCandidatesByTripRoomId(@PathVariable Long tripRoomId) {
         return destinationCandidateRepository.findByTripRoomId(tripRoomId);
     }
+
+    @PutMapping("/{id}/vote")
+    public DestinationCandidate voteDestinationCandidate(@PathVariable Long id) {
+        DestinationCandidate candidate = destinationCandidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
+
+        int currentVotes = candidate.getVotes() == null ? 0 : candidate.getVotes();
+        candidate.setVotes(currentVotes + 1);
+
+        return destinationCandidateRepository.save(candidate);
+    }
 }
