@@ -42,4 +42,27 @@ public class DestinationCandidateController {
 
         return destinationCandidateRepository.save(candidate);
     }
+
+    @PutMapping("/{id}")
+    public DestinationCandidate updateDestinationCandidate(
+            @PathVariable Long id,
+            @RequestBody DestinationCandidate request
+    ) {
+        DestinationCandidate candidate = destinationCandidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
+
+        candidate.setName(request.getName());
+        candidate.setRegion(request.getRegion());
+        candidate.setDescription(request.getDescription());
+
+        return destinationCandidateRepository.save(candidate);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteDestinationCandidate(@PathVariable Long id) {
+        DestinationCandidate candidate = destinationCandidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
+
+        destinationCandidateRepository.delete(candidate);
+    }
 }
