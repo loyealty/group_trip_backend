@@ -31,4 +31,27 @@ public class TripMemberController {
     public List<TripMember> getTripMembersByTripRoomId(@PathVariable Long tripRoomId) {
         return tripMemberRepository.findByTripRoomId(tripRoomId);
     }
+
+    @PutMapping("/{id}")
+    public TripMember updateTripMember(@PathVariable Long id, @RequestBody TripMember updatedTripMember) {
+        TripMember tripMember = tripMemberRepository.findById(id).orElse(null);
+
+        if (tripMember == null) {
+            return null;
+        }
+
+        tripMember.setTripRoomId(updatedTripMember.getTripRoomId());
+        tripMember.setMemberName(updatedTripMember.getMemberName());
+
+        if (updatedTripMember.getRole() != null && !updatedTripMember.getRole().isEmpty()) {
+            tripMember.setRole(updatedTripMember.getRole());
+        }
+
+        return tripMemberRepository.save(tripMember);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTripMember(@PathVariable Long id) {
+        tripMemberRepository.deleteById(id);
+    }
 }
