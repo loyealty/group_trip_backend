@@ -19,6 +19,14 @@ public class DestinationCandidateController {
 
     @PostMapping
     public DestinationCandidate createDestinationCandidate(@RequestBody DestinationCandidate candidate) {
+        if (candidate.getVotes() == null) {
+            candidate.setVotes(0);
+        }
+
+        if (candidate.getConfirmed() == null) {
+            candidate.setConfirmed(false);
+        }
+
         return destinationCandidateRepository.save(candidate);
     }
 
@@ -43,6 +51,25 @@ public class DestinationCandidateController {
         return destinationCandidateRepository.save(candidate);
     }
 
+    @PutMapping("/{id}/confirm")
+    public DestinationCandidate confirmDestinationCandidate(@PathVariable Long id) {
+        DestinationCandidate selectedCandidate = destinationCandidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
+
+        List<DestinationCandidate> candidates =
+                destinationCandidateRepository.findByTripRoomId(selectedCandidate.getTripRoomId());
+
+        for (DestinationCandidate candidate : candidates) {
+            candidate.setConfirmed(false);
+        }
+
+        selectedCandidate.setConfirmed(true);
+
+        destinationCandidateRepository.saveAll(candidates);
+
+        return destinationCandidateRepository.save(selectedCandidate);
+    }
+
     @PutMapping("/{id}")
     public DestinationCandidate updateDestinationCandidate(
             @PathVariable Long id,
@@ -54,6 +81,18 @@ public class DestinationCandidateController {
         candidate.setName(request.getName());
         candidate.setRegion(request.getRegion());
         candidate.setDescription(request.getDescription());
+
+        if (request.getTripRoomId() != null) {
+            candidate.setTripRoomId(request.getTripRoomId());
+        }
+
+        if (request.getVotes() != null) {
+            candidate.setVotes(request.getVotes());
+        }
+
+        if (request.getConfirmed() != null) {
+            candidate.setConfirmed(request.getConfirmed());
+        }
 
         return destinationCandidateRepository.save(candidate);
     }

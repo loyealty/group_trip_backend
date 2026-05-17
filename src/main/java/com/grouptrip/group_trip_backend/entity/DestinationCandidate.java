@@ -27,13 +27,20 @@ public class DestinationCandidate {
 
     private Integer votes;
 
+    private Boolean confirmed;
+
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+
         if (this.votes == null) {
             this.votes = 0;
+        }
+
+        if (this.confirmed == null) {
+            this.confirmed = false;
         }
     }
 }
