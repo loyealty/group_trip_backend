@@ -33,6 +33,11 @@ public class TripRoomController {
         return tripRoomRepository.findAll();
     }
 
+    @GetMapping("/owner/{ownerId}")
+    public List<TripRoom> getTripRoomsByOwnerId(@PathVariable Long ownerId) {
+        return tripRoomRepository.findByOwnerId(ownerId);
+    }
+
     @GetMapping("/{id}")
     public TripRoom getTripRoom(@PathVariable Long id) {
         return tripRoomRepository.findById(id).orElse(null);
