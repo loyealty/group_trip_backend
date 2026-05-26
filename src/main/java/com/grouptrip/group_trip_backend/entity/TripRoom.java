@@ -30,6 +30,9 @@ public class TripRoom {
 
     private String status;
 
+    @Column(nullable = false, unique = true, length = 20)
+    private String inviteCode;
+
     private LocalDateTime createdAt;
 
     @PrePersist

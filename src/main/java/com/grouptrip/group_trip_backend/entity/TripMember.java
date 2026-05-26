@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "trip_members",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"trip_room_id", "member_name"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"trip_room_id", "user_id"})
 )
 public class TripMember {
 
@@ -21,6 +21,9 @@ public class TripMember {
 
     @Column(name = "trip_room_id", nullable = false)
     private Long tripRoomId;
+
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "member_name", nullable = false, length = 50)
     private String memberName;

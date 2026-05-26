@@ -8,4 +8,8 @@ import java.util.List;
 public interface TripMemberRepository extends JpaRepository<TripMember, Long> {
 
     List<TripMember> findByTripRoomId(Long tripRoomId);
+
+    List<TripMember> findByUserId(Long userId);
+
+    boolean existsByTripRoomIdAndUserId(Long tripRoomId, Long userId);
 }
