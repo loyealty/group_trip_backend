@@ -1,7 +1,10 @@
 package com.grouptrip.group_trip_backend.controller;
 
 import com.grouptrip.group_trip_backend.entity.DestinationCandidate;
+import com.grouptrip.group_trip_backend.entity.DestinationVote;
 import com.grouptrip.group_trip_backend.repository.DestinationCandidateRepository;
+import com.grouptrip.group_trip_backend.repository.DestinationVoteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +15,14 @@ import java.util.List;
 public class DestinationCandidateController {
 
     private final DestinationCandidateRepository destinationCandidateRepository;
+    private final DestinationVoteRepository destinationVoteRepository;
 
-    public DestinationCandidateController(DestinationCandidateRepository destinationCandidateRepository) {
+    public DestinationCandidateController(
+            DestinationCandidateRepository destinationCandidateRepository,
+            DestinationVoteRepository destinationVoteRepository
+    ) {
         this.destinationCandidateRepository = destinationCandidateRepository;
+        this.destinationVoteRepository = destinationVoteRepository;
     }
 
     @PostMapping
@@ -41,9 +49,27 @@ public class DestinationCandidateController {
     }
 
     @PutMapping("/{id}/vote")
-    public DestinationCandidate voteDestinationCandidate(@PathVariable Long id) {
+    public DestinationCandidate voteDestinationCandidate(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
         DestinationCandidate candidate = destinationCandidateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
+
+        boolean alreadyVoted = destinationVoteRepository.existsByTripRoomIdAndUserId(
+                candidate.getTripRoomId(),
+                userId
+        );
+
+        if (alreadyVoted) {
+            throw new RuntimeException("이미 투표했습니다.");
+        }
+
+        DestinationVote vote = new DestinationVote();
+        vote.setTripRoomId(candidate.getTripRoomId());
+        vote.setCandidateId(candidate.getId());
+        vote.setUserId(userId);
+        destinationVoteRepository.save(vote);
 
         int currentVotes = candidate.getVotes() == null ? 0 : candidate.getVotes();
         candidate.setVotes(currentVotes + 1);
@@ -70,14 +96,29 @@ public class DestinationCandidateController {
         return destinationCandidateRepository.save(selectedCandidate);
     }
 
+    @Transactional
     @PutMapping("/{id}/cancel-confirm")
     public DestinationCandidate cancelConfirmDestinationCandidate(@PathVariable Long id) {
-        DestinationCandidate candidate = destinationCandidateRepository.findById(id)
+        DestinationCandidate selectedCandidate = destinationCandidateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
 
-        candidate.setConfirmed(false);
+        Long tripRoomId = selectedCandidate.getTripRoomId();
 
-        return destinationCandidateRepository.save(candidate);
+        List<DestinationCandidate> candidates =
+                destinationCandidateRepository.findByTripRoomId(tripRoomId);
+
+        for (DestinationCandidate candidate : candidates) {
+            candidate.setConfirmed(false);
+            candidate.setVotes(0);
+        }
+
+        destinationVoteRepository.deleteByTripRoomId(tripRoomId);
+        destinationCandidateRepository.saveAll(candidates);
+
+        selectedCandidate.setConfirmed(false);
+        selectedCandidate.setVotes(0);
+
+        return selectedCandidate;
     }
 
     @PutMapping("/{id}")
