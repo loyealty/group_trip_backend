@@ -70,6 +70,16 @@ public class DestinationCandidateController {
         return destinationCandidateRepository.save(selectedCandidate);
     }
 
+    @PutMapping("/{id}/cancel-confirm")
+    public DestinationCandidate cancelConfirmDestinationCandidate(@PathVariable Long id) {
+        DestinationCandidate candidate = destinationCandidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("여행지 후보를 찾을 수 없습니다."));
+
+        candidate.setConfirmed(false);
+
+        return destinationCandidateRepository.save(candidate);
+    }
+
     @PutMapping("/{id}")
     public DestinationCandidate updateDestinationCandidate(
             @PathVariable Long id,
