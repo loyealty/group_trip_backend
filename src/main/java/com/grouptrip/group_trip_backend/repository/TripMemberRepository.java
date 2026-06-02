@@ -4,6 +4,7 @@ import com.grouptrip.group_trip_backend.entity.TripMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TripMemberRepository extends JpaRepository<TripMember, Long> {
 
@@ -12,4 +13,6 @@ public interface TripMemberRepository extends JpaRepository<TripMember, Long> {
     List<TripMember> findByUserId(Long userId);
 
     boolean existsByTripRoomIdAndUserId(Long tripRoomId, Long userId);
+
+    Optional<TripMember> findByTripRoomIdAndUserId(Long tripRoomId, Long userId);
 }

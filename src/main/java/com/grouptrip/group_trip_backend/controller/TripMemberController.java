@@ -43,6 +43,10 @@ public class TripMemberController {
         tripMember.setTripRoomId(updatedTripMember.getTripRoomId());
         tripMember.setMemberName(updatedTripMember.getMemberName());
 
+        if (updatedTripMember.getUserId() != null) {
+            tripMember.setUserId(updatedTripMember.getUserId());
+        }
+
         if (updatedTripMember.getRole() != null && !updatedTripMember.getRole().isEmpty()) {
             tripMember.setRole(updatedTripMember.getRole());
         }
@@ -53,5 +57,20 @@ public class TripMemberController {
     @DeleteMapping("/{id}")
     public void deleteTripMember(@PathVariable Long id) {
         tripMemberRepository.deleteById(id);
+    }
+
+    @DeleteMapping("/trip-room/{tripRoomId}/user/{userId}")
+    public void leaveTripRoom(
+            @PathVariable Long tripRoomId,
+            @PathVariable Long userId
+    ) {
+        TripMember tripMember = tripMemberRepository.findByTripRoomIdAndUserId(tripRoomId, userId)
+                .orElseThrow(() -> new RuntimeException("참여 중인 여행방 정보를 찾을 수 없습니다."));
+
+        if ("OWNER".equals(tripMember.getRole())) {
+            throw new RuntimeException("방장은 여행방 나가기를 사용할 수 없습니다.");
+        }
+
+        tripMemberRepository.delete(tripMember);
     }
 }
